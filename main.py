@@ -7,8 +7,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import *
 from random import randint
 
+
 # Logging
 logging.basicConfig(level=logging.INFO)
+
 
 # Bot configs
 bot = Bot(token=token, parse_mode=types.ParseMode.HTML)
@@ -37,7 +39,7 @@ async def welcome_send_info(message: types.Message):
                          f"<code>!unpin</code> - открепить сообщение\n"
                          f"<code>!unpin_all</code> - открепить все сообщения в чате\n\n"
                          f"❗Все команды кроме последней, нужно отправлять ответом на сообщение пользователя!\n\n"
-                         f"Бота сделал@mr_storm")
+                         f"Бота сделал @mr_storm")
 
 
 # new chat member
@@ -68,9 +70,6 @@ async def welcome(message: types.Message):
                                 f"Username - @{message.from_user.username}\n")
 
 
-# f"Chat Id - {message.chat.id}"
-
-
 # ban user
 @dp.message_handler(commands=['ban'], commands_prefix='!/')
 async def ban(message: types.Message):
@@ -86,8 +85,6 @@ async def ban(message: types.Message):
                                                                  f" был забанен админом [{message.from_user.full_name}]"
                                                                  f"(tg://user?id={admin_id})",
                                    parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            pass
 
 
 # mute user in chat
@@ -106,8 +103,6 @@ async def mute(message: types.Message):
             await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
                                         f" muted for 10 minutes",
                                    chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            pass
 
 
 @dp.message_handler(commands=['mute30m'], commands_prefix='!/')
@@ -125,10 +120,8 @@ async def mute(message: types.Message):
             await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
                                         f" muted for 30 minutes",
                                    chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            pass
 
-
+            
 @dp.message_handler(commands=['mute1h'], commands_prefix='!/')
 async def mute(message: types.Message):
     if message.chat.type != "private":
@@ -144,8 +137,6 @@ async def mute(message: types.Message):
             await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
                                         f" muted for 1 hour",
                                    chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            pass
 
 
 @dp.message_handler(commands=['mute6h'], commands_prefix='!/')
@@ -163,8 +154,6 @@ async def mute(message: types.Message):
             await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
                                         f" muted for 6 hours",
                                    chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            pass
 
 
 @dp.message_handler(commands=['mute12h'], commands_prefix='!/')
@@ -182,8 +171,6 @@ async def mute(message: types.Message):
             await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
                                         f" muted for 12 hours",
                                    chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            pass
 
 
 @dp.message_handler(commands=['mute1d'], commands_prefix='!/')
@@ -201,8 +188,6 @@ async def mute(message: types.Message):
             await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
                                         f" muted for 1 day",
                                    chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            pass
 
 
 # random mute chat member
@@ -212,7 +197,7 @@ async def mute_random(message: types.Message):
         now_time = int(time.time())
         replied_user_id = message.from_user.id
         replied_user = message.from_user.full_name
-        random_m = randint(1, 10)
+        random_m = randint(1, 15)
         await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user_id, can_send_messages=False,
                                        can_send_media_messages=False, can_send_other_messages=False,
                                        until_date=now_time + 60 * random_m)
@@ -245,8 +230,6 @@ async def pin_message(message: types.Message):
         if message.from_user.id in admins_list:
             msg_id = message.reply_to_message.message_id
             await bot.pin_chat_message(message_id=msg_id, chat_id=message.chat.id)
-        else:
-            pass
 
 
 # unpin chat message
@@ -257,8 +240,6 @@ async def unpin_message(message: types.Message):
         if message.from_user.id in admins_list:
             msg_id = message.reply_to_message.message_id
             await bot.unpin_chat_message(message_id=msg_id, chat_id=message.chat.id)
-        else:
-            pass
 
 
 # unpin all pins
@@ -268,8 +249,6 @@ async def unpin_all_messages(message: types.Message):
         admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
         if message.from_user.id in admins_list:
             await bot.unpin_all_chat_messages(chat_id=message.chat.id)
-        else:
-            pass
 
 
 # delete user message
@@ -281,8 +260,6 @@ async def delete_message(message: types.Message):
             msg_id = message.reply_to_message.message_id
             await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        else:
-            pass
 
 
 # get chat admins list
@@ -319,20 +296,20 @@ async def report_by_user(message: types.Message):
         await message.reply("I reported it to chat admins, thank you!")
 
 
-# # delete links and tags from users, allow for admins
-# @dp.message_handler(content_types=['text'])
-# async def delete_links(message: types.Message):
-#     admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-#     if message.from_user.id not in admins_list:
+# delete links and tags from users, allow for admins
+@dp.message_handler(content_types=['text'])
+async def delete_links(message: types.Message):
+    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
+    if message.from_user.id not in admins_list:
 
-#         if '@' in message.text:
-#             await bot.delete_message(message.chat.id, message.message_id)
+        if '@' in message.text:
+            await bot.delete_message(message.chat.id, message.message_id)
 
-#         for entity in message.entities:
-#             if entity.type in ["url", "text_link"]: 
-#                 await bot.delete_message(message.chat.id, message.message_id)
-#             else:
-#                 pass
+        for entity in message.entities:
+            if entity.type in ["url", "text_link"]: 
+                await bot.delete_message(message.chat.id, message.message_id)
+            else:
+                pass
 
 
 # Polling
