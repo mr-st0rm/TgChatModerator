@@ -1,4 +1,4 @@
-# chatmoder_bot
+# TelegramChatModerator
 Bot moderator for your telegram chat
 
 Русский
