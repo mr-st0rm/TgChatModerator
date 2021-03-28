@@ -3,30 +3,30 @@ Bot moderator for your telegram chat
 
 Русский
 
-Это бот модератор, для использования добавьте бота в ваш чат со стандартными разрешениями админа, иначе бот не сможет функционировать
-Команды для администраторов:
-!ban - бан пользователя и удаление его из чата
-!mute10m (30m, 1h, 6h, 1d)- запретить пользователю отправлять сообщение в чат в указанное время (минуты, часы, дни)
-!unmute - разрешить отправку сообщений
-!del - удалить сообщение
-!pin - закрепить сообщение
-!unpin - открепить сообщение
-!unpin_all - открепить все сообщения в чате
-❗Все команды кроме последней, нужно отправлять ответом на сообщение пользователя!
-Бота сделал @mr_storm
-
-###################################################################################################
-
-English
-
-This is a bot moderator, to use add the bot to your chat with standard admin permissions, otherwise the bot will not be able to function
-Commands for administrators:
-! ban - ban the user and remove him from the chat
-! mute10m (30m, 1h, 6h, 1d) - prohibit the user from sending a message to the chat at the specified time (minutes, hours, days)
-! unmute - allow sending messages
-! del - delete a message
-! pin - pin the message
-! unpin - unpin the message
-! unpin_all - unpin all chat messages
-❗All commands except the last one must be sent as a reply to the user's message!
-Bot made by @mr_storm
+Это бот модератор, для использования добавьте бота в ваш чат со стандартными разрешениями админа, иначе бот не сможет функционировать</br>
+Команды для администраторов:</br>
+!ban - бан пользователя и удаление его из чата</br>
+!mute10m (30m, 1h, 6h, 1d)- запретить пользователю отправлять сообщение в чат в указанное время (минуты, часы, дни)</br>
+!unmute - разрешить отправку сообщений</br>
+!del - удалить сообщение</br>
+!pin - закрепить сообщение</br>
+!unpin - открепить сообщение</br>
+!unpin_all - открепить все сообщения в чате</br>
+❗Все команды кроме последней, нужно отправлять ответом на сообщение пользователя!</br>
+Бота сделал @mr_storm</br>
+</br>
+###################################################################################################</br>
+</br>
+English</br>
+</br>
+This is a bot moderator, to use add the bot to your chat with standard admin permissions, otherwise the bot will not be able to function</br>
+Commands for administrators:</br>
+! ban - ban the user and remove him from the chat</br>
+! mute10m (30m, 1h, 6h, 1d) - prohibit the user from sending a message to the chat at the specified time (minutes, hours, days)</br>
+! unmute - allow sending messages</br>
+! del - delete a message</br>
+! pin - pin the message</br>
+! unpin - unpin the message</br>
+! unpin_all - unpin all chat messages</br>
+❗All commands except the last one must be sent as a reply to the user's message!</br>
+Bot made by @mr_storm</br>
