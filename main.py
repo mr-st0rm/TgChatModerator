@@ -95,7 +95,6 @@ async def mute(message: types.Message):
         if message.from_user.id in admins_list:
             replied_user = message.reply_to_message.from_user.id
             now_time = int(time.time())
-            # msg_id = message.reply_to_message.message_id
             await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
                                            can_send_media_messages=False, can_send_other_messages=False,
                                            until_date=now_time + 60 * 10)
@@ -112,7 +111,6 @@ async def mute(message: types.Message):
         if message.from_user.id in admins_list:
             replied_user = message.reply_to_message.from_user.id
             now_time = int(time.time())
-            # msg_id = message.reply_to_message.message_id
             await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
                                            can_send_media_messages=False, can_send_other_messages=False,
                                            until_date=now_time + 60 * 30)
@@ -129,7 +127,6 @@ async def mute(message: types.Message):
         if message.from_user.id in admins_list:
             replied_user = message.reply_to_message.from_user.id
             now_time = int(time.time())
-            # msg_id = message.reply_to_message.message_id
             await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
                                            can_send_media_messages=False, can_send_other_messages=False,
                                            until_date=now_time + 60 * 60)
@@ -146,7 +143,6 @@ async def mute(message: types.Message):
         if message.from_user.id in admins_list:
             replied_user = message.reply_to_message.from_user.id
             now_time = int(time.time())
-            # msg_id = message.reply_to_message.message_id
             await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
                                            can_send_media_messages=False, can_send_other_messages=False,
                                            until_date=now_time + 60 * 360)
@@ -163,7 +159,6 @@ async def mute(message: types.Message):
         if message.from_user.id in admins_list:
             replied_user = message.reply_to_message.from_user.id
             now_time = int(time.time())
-            # msg_id = message.reply_to_message.message_id
             await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
                                            can_send_media_messages=False, can_send_other_messages=False,
                                            until_date=now_time + 60 * 720)
@@ -180,7 +175,6 @@ async def mute(message: types.Message):
         if message.from_user.id in admins_list:
             replied_user = message.reply_to_message.from_user.id
             now_time = int(time.time())
-            # msg_id = message.reply_to_message.message_id
             await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
                                            can_send_media_messages=False, can_send_other_messages=False,
                                            until_date=now_time + 60 * 1440)
@@ -213,7 +207,6 @@ async def unmute(message: types.Message):
         admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
         if message.from_user.id in admins_list:
             replied_user = message.reply_to_message.from_user.id
-            # msg_id = message.reply_to_message.message_id
             await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=True,
                                            can_send_media_messages=True, can_send_other_messages=True)
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
