@@ -6,7 +6,7 @@ Bot moderator for your telegram chat
 Это бот модератор, для использования добавьте бота в ваш чат со стандартными разрешениями админа, иначе бот не сможет функционировать</br>
 Команды для администраторов:</br>
 !ban - бан пользователя и удаление его из чата</br>
-!mute10m (30m, 1h, 6h, 1d)- запретить пользователю отправлять сообщение в чат в указанное время (минуты, часы, дни)</br>
+!mute (m, h, d)- запретить пользователю отправлять сообщение в чат указанное время (минуты, часы, дни)</br>
 !unmute - разрешить отправку сообщений</br>
 !del - удалить сообщение</br>
 !pin - закрепить сообщение</br>
@@ -22,7 +22,7 @@ English</br>
 This is a bot moderator, to use add the bot to your chat with standard admin permissions, otherwise the bot will not be able to function</br>
 Commands for administrators:</br>
 ! ban - ban the user and remove him from the chat</br>
-! mute10m (30m, 1h, 6h, 1d) - prohibit the user from sending a message to the chat at the specified time (minutes, hours, days)</br>
+! mute (m, h, d) - prohibit the user from sending a message to the chat at the specified time (minutes, hours, days)</br>
 ! unmute - allow sending messages</br>
 ! del - delete a message</br>
 ! pin - pin the message</br>
