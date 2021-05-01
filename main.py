@@ -84,101 +84,38 @@ async def ban(message: types.Message):
 
 
 # mute user in chat
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute10m'],
+@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute'],
                     commands_prefix='!/')
 async def mute(message: types.Message):
     admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
     if message.from_user.id in admins_list:
+        ban_for = 0
+        args = message.get_args()
+        if args:
+            till_date = args
+        else:
+            till_date = message.text.split()[1]
+
+        if till_date[-1] == "m":
+            ban_for = int(till_date[:-1]) * 60
+        elif till_date[-1] == "h":
+            ban_for = int(till_date[:-1]) * 3600
+        elif till_date[-1] == "d":
+            ban_for = int(till_date[:-1]) * 86400
+        else:
+            ban_for = 15 * 60
+
+
         replied_user = message.reply_to_message.from_user.id
         now_time = int(time.time())
         await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
                                        can_send_media_messages=False, can_send_other_messages=False,
-                                       until_date=now_time + 60 * 10)
+                                       until_date=now_time + ban_for)
         await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
         await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" muted for 10 minutes",
+                                    f" muted for {till_date}",
                                chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
 
-
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute30m'],
-                    commands_prefix='!/')
-async def mute(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        replied_user = message.reply_to_message.from_user.id
-        now_time = int(time.time())
-        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
-                                       can_send_media_messages=False, can_send_other_messages=False,
-                                       until_date=now_time + 60 * 30)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" muted for 30 minutes",
-                               chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-
-
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute1h'],
-                    commands_prefix='!/')
-async def mute(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        replied_user = message.reply_to_message.from_user.id
-        now_time = int(time.time())
-        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
-                                       can_send_media_messages=False, can_send_other_messages=False,
-                                       until_date=now_time + 60 * 60)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" muted for 1 hour",
-                               chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-
-
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute6h'],
-                    commands_prefix='!/')
-async def mute(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        replied_user = message.reply_to_message.from_user.id
-        now_time = int(time.time())
-        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
-                                       can_send_media_messages=False, can_send_other_messages=False,
-                                       until_date=now_time + 60 * 360)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" muted for 6 hours",
-                               chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-
-
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute12h'],
-                    commands_prefix='!/')
-async def mute(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        replied_user = message.reply_to_message.from_user.id
-        now_time = int(time.time())
-        # msg_id = message.reply_to_message.message_id
-        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
-                                       can_send_media_messages=False, can_send_other_messages=False,
-                                       until_date=now_time + 60 * 720)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" muted for 12 hours",
-                               chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-
-
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute1d'],
-                    commands_prefix='!/')
-async def mute(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        replied_user = message.reply_to_message.from_user.id
-        now_time = int(time.time())
-        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
-                                       can_send_media_messages=False, can_send_other_messages=False,
-                                       until_date=now_time + 60 * 1440)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" muted for 1 day",
-                               chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
 
 
 # random mute chat member
@@ -294,8 +231,6 @@ async def delete_links(message: types.Message):
         for entity in message.entities:
             if entity.type in ["url", "text_link"]:
                 await bot.delete_message(message.chat.id, message.message_id)
-            else:
-                pass
 
 
 # Polling
