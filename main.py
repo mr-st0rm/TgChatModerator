@@ -1,19 +1,11 @@
-import logging
 import time
 
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram import executor, types
+from aiogram.dispatcher.filters import AdminFilter, IsReplyFilter
 
-from config import token, adminId
+from config import adminId
 from random import randint
-
-# Logging
-logging.basicConfig(level=logging.INFO)
-
-# Bot configs
-bot = Bot(token=token, parse_mode=types.ParseMode.HTML)
-storage = MemoryStorage()
-dp = Dispatcher(bot, storage=storage)
+from misc import bot, dp
 
 
 # Send admin message about bot started
@@ -28,7 +20,7 @@ async def welcome_send_info(message: types.Message):
                          f"Это бот модератор, для использования добавьте бота в ваш чат со стандартными разрешениями"
                          f" админа, иначе бот не сможет функционировать\n\n"
                          f"Команды для администраторов:\n\n"
-                         f" <code>!ban</code> - бан пользователя и удаление его из чата\n"
+                         f" <code>!ban</code> (reason)- бан пользователя и удаление его из чата\n"
                          f" <code>!mute10m</code> (30m, 1h, 6h, 1d)- запретить "
                          f"пользователю отправлять сообщение в чат в указанное время (минуты, часы, дни)\n"
                          f"<code>!unmute</code> - разрешить отправку сообщений\n"
@@ -68,54 +60,48 @@ async def welcome(message: types.Message):
 
 
 # ban user
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['ban'], commands_prefix='!/')
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands=['ban'],
+                    commands_prefix='!/', chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP])
 async def ban(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        replied_user = message.reply_to_message.from_user.id
-        admin_id = message.from_user.id
-        await bot.kick_chat_member(chat_id=message.chat.id, user_id=replied_user)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(chat_id=message.chat.id, text=f"[{message.reply_to_message.from_user.full_name}]"
-                                                             f"(tg://user?id={replied_user})"
-                                                             f" был забанен админом [{message.from_user.full_name}]"
-                                                             f"(tg://user?id={admin_id})",
-                               parse_mode=types.ParseMode.MARKDOWN)
+    replied_user = message.reply_to_message.from_user.id
+    admin_id = message.from_user.id
+    await bot.kick_chat_member(chat_id=message.chat.id, user_id=replied_user)
+    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    await bot.send_message(chat_id=message.chat.id, text=f"[{message.reply_to_message.from_user.full_name}]"
+                                                         f"(tg://user?id={replied_user})"
+                                                         f" был забанен админом [{message.from_user.full_name}]"
+                                                         f"(tg://user?id={admin_id})",
+                           parse_mode=types.ParseMode.MARKDOWN)
 
 
 # mute user in chat
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['mute'],
-                    commands_prefix='!/')
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands=['mute'],
+                    commands_prefix='!/', chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP])
 async def mute(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        ban_for = 0
-        args = message.get_args()
-        if args:
-            till_date = args
-        else:
-            till_date = message.text.split()[1]
+    args = message.get_args()
+    if args:
+        till_date = message.text.split()[1]
+    else:
+        till_date = "15m"
 
-        if till_date[-1] == "m":
-            ban_for = int(till_date[:-1]) * 60
-        elif till_date[-1] == "h":
-            ban_for = int(till_date[:-1]) * 3600
-        elif till_date[-1] == "d":
-            ban_for = int(till_date[:-1]) * 86400
-        else:
-            ban_for = 15 * 60
+    if till_date[-1] == "m":
+        ban_for = int(till_date[:-1]) * 60
+    elif till_date[-1] == "h":
+        ban_for = int(till_date[:-1]) * 3600
+    elif till_date[-1] == "d":
+        ban_for = int(till_date[:-1]) * 86400
+    else:
+        ban_for = 15 * 60
 
-
-        replied_user = message.reply_to_message.from_user.id
-        now_time = int(time.time())
-        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
-                                       can_send_media_messages=False, can_send_other_messages=False,
-                                       until_date=now_time + ban_for)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" muted for {till_date}",
-                               chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
-
+    replied_user = message.reply_to_message.from_user.id
+    now_time = int(time.time())
+    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
+                                   can_send_media_messages=False, can_send_other_messages=False,
+                                   until_date=now_time + ban_for)
+    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
+                                f" muted for {till_date}",
+                           chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
 
 
 # random mute chat member
@@ -134,56 +120,48 @@ async def mute_random(message: types.Message):
 
 
 # unmute user in chat
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unmute'],
-                    commands_prefix='!/')
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+                    chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unmute'])
 async def unmute(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        replied_user = message.reply_to_message.from_user.id
-        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=True,
-                                       can_send_media_messages=True, can_send_other_messages=True)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
-                                    f" можешь теперь писать в чат )",
-                               chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
+    replied_user = message.reply_to_message.from_user.id
+    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=True,
+                                   can_send_media_messages=True, can_send_other_messages=True)
+    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
+                                f" можешь теперь писать в чат )",
+                           chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
 
 
 # pin chat message
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['pin'], commands_prefix='!/')
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True),
+                    chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['pin'], commands_prefix='!/')
 async def pin_message(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        msg_id = message.reply_to_message.message_id
-        await bot.pin_chat_message(message_id=msg_id, chat_id=message.chat.id)
+    msg_id = message.reply_to_message.message_id
+    await bot.pin_chat_message(message_id=msg_id, chat_id=message.chat.id)
 
 
 # unpin chat message
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unpin'],
-                    commands_prefix='!/')
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+                    chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unpin'])
 async def unpin_message(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        msg_id = message.reply_to_message.message_id
-        await bot.unpin_chat_message(message_id=msg_id, chat_id=message.chat.id)
+    msg_id = message.reply_to_message.message_id
+    await bot.unpin_chat_message(message_id=msg_id, chat_id=message.chat.id)
 
 
 # unpin all pins
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unpin_all'],
-                    commands_prefix='!/')
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+                    chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unpin_all'])
 async def unpin_all_messages(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        await bot.unpin_all_chat_messages(chat_id=message.chat.id)
+    await bot.unpin_all_chat_messages(chat_id=message.chat.id)
 
 
 # delete user message
-@dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['del'], commands_prefix='!/')
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+                    chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['del'])
 async def delete_message(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id in admins_list:
-        msg_id = message.reply_to_message.message_id
-        await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    msg_id = message.reply_to_message.message_id
+    await bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
+    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
 
 
 # get chat admins list
