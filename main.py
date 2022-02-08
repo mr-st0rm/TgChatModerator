@@ -1,7 +1,7 @@
 import time
 
 from aiogram import executor, types
-from aiogram.dispatcher.filters import AdminFilter, IsReplyFilter
+from aiogram.dispatcher.filters import AdminFilter, IsReplyFilter, Text
 
 from config import adminId
 from random import randint
@@ -61,7 +61,7 @@ async def welcome(message: types.Message):
 
 # ban user
 @dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands=['ban'],
-                    commands_prefix='!/', chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP])
+                    commands_prefix='!', chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP])
 async def ban(message: types.Message):
     replied_user = message.reply_to_message.from_user.id
     admin_id = message.from_user.id
@@ -76,10 +76,11 @@ async def ban(message: types.Message):
 
 # mute user in chat
 @dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands=['mute'],
-                    commands_prefix='!/', chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP])
+                    commands_prefix='!', chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP])
 async def mute(message: types.Message):
-    args = message.get_args()
-    if args:
+    args = message.text.split()
+
+    if len(args) > 1:
         till_date = message.text.split()[1]
     else:
         till_date = "15m"
@@ -95,8 +96,10 @@ async def mute(message: types.Message):
 
     replied_user = message.reply_to_message.from_user.id
     now_time = int(time.time())
-    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=False,
-                                   can_send_media_messages=False, can_send_other_messages=False,
+    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user,
+                                   permissions=types.ChatPermissions(can_send_messages=True,
+                                                                     can_send_media_messages=True,
+                                                                     can_send_other_messages=True),
                                    until_date=now_time + ban_for)
     await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
@@ -111,8 +114,10 @@ async def mute_random(message: types.Message):
     replied_user_id = message.from_user.id
     replied_user = message.from_user.full_name
     random_m = randint(1, 10)
-    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user_id, can_send_messages=False,
-                                   can_send_media_messages=False, can_send_other_messages=False,
+    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user_id,
+                                   permissions=types.ChatPermissions(can_send_messages=False,
+                                                                     can_send_media_messages=False,
+                                                                     can_send_other_messages=False),
                                    until_date=now_time + 60 * random_m)
     await bot.send_message(text=f"[{replied_user}](tg://user?id={replied_user_id})"
                                 f" выиграл(а) мут на {random_m} минут(ы)",
@@ -120,12 +125,14 @@ async def mute_random(message: types.Message):
 
 
 # unmute user in chat
-@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!',
                     chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unmute'])
 async def unmute(message: types.Message):
     replied_user = message.reply_to_message.from_user.id
-    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user, can_send_messages=True,
-                                   can_send_media_messages=True, can_send_other_messages=True)
+    await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user,
+                                   permissions=types.ChatPermissions(can_send_messages=True,
+                                                                     can_send_media_messages=True,
+                                                                     can_send_other_messages=True),)
     await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     await bot.send_message(text=f"[{message.reply_to_message.from_user.full_name}](tg://user?id={replied_user})"
                                 f" можешь теперь писать в чат )",
@@ -134,14 +141,14 @@ async def unmute(message: types.Message):
 
 # pin chat message
 @dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True),
-                    chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['pin'], commands_prefix='!/')
+                    chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['pin'], commands_prefix='!')
 async def pin_message(message: types.Message):
     msg_id = message.reply_to_message.message_id
     await bot.pin_chat_message(message_id=msg_id, chat_id=message.chat.id)
 
 
 # unpin chat message
-@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!',
                     chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unpin'])
 async def unpin_message(message: types.Message):
     msg_id = message.reply_to_message.message_id
@@ -149,14 +156,14 @@ async def unpin_message(message: types.Message):
 
 
 # unpin all pins
-@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!',
                     chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unpin_all'])
 async def unpin_all_messages(message: types.Message):
     await bot.unpin_all_chat_messages(chat_id=message.chat.id)
 
 
 # delete user message
-@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!/',
+@dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!',
                     chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['del'])
 async def delete_message(message: types.Message):
     msg_id = message.reply_to_message.message_id
