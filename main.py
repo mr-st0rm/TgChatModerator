@@ -1,7 +1,8 @@
+import logging
 import time
 
 from aiogram import executor, types
-from aiogram.dispatcher.filters import AdminFilter, IsReplyFilter, Text
+from aiogram.dispatcher.filters import AdminFilter, IsReplyFilter
 
 from config import adminId
 from random import randint
@@ -9,7 +10,7 @@ from misc import bot, dp
 
 
 # Send admin message about bot started
-async def send_adm(dp):
+async def send_adm(*args, **kwargs):
     await bot.send_message(chat_id=adminId, text='Bot started!')
 
 
@@ -39,7 +40,7 @@ async def new_chat_member(message: types.Message):
     await bot.delete_message(chat_id=chat_id, message_id=message.message_id)
     await bot.send_message(chat_id=chat_id, text=f"[{message.new_chat_members[0].full_name}]"
                                                  f"(tg://user?id={message.new_chat_members[0].id})"
-                                                 f"🍞🧂, добро пожаловать в чат!", parse_mode=types.ParseMode.MARKDOWN)
+                                                 f"🍞🧂, welcome to the group!", parse_mode=types.ParseMode.MARKDOWN)
 
 
 # delete message user leave chat
@@ -124,10 +125,10 @@ async def mute_random(message: types.Message):
                            chat_id=message.chat.id, parse_mode=types.ParseMode.MARKDOWN)
 
 
-# unmute user in chat
+# un_mute user in chat
 @dp.message_handler(AdminFilter(is_chat_admin=True), IsReplyFilter(is_reply=True), commands_prefix='!',
                     chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['unmute'])
-async def unmute(message: types.Message):
+async def un_mute_user(message: types.Message):
     replied_user = message.reply_to_message.from_user.id
     await bot.restrict_chat_member(chat_id=message.chat.id, user_id=replied_user,
                                    permissions=types.ChatPermissions(can_send_messages=True,
@@ -175,15 +176,13 @@ async def delete_message(message: types.Message):
 @dp.message_handler(chat_type=[types.ChatType.SUPERGROUP, types.ChatType.GROUP], commands=['admins'],
                     commands_prefix='!/')
 async def get_admin_list(message: types.Message):
-    admins_id = [(admin.user.id, admin.user.full_name) for admin in await bot.get_chat_administrators(
-        chat_id=message.chat.id)]
-    admins_list = []
-    for ids, name in admins_id:
-        admins_list.append("".join(f"[{name}](tg://user?id={ids})"))
-    result_list = ""
-    for admins in admins_list:
-        result_list += "".join(admins) + '\n'
-    await message.reply("Админы :\n" + result_list, parse_mode=types.ParseMode.MARKDOWN)
+    admins = await message.chat.get_administrators()
+    msg = str("Админы :\n")
+    
+    for admin in admins:
+        msg += f"<a href=tg://user?id={admin.user.id}>{admin.user.full_name}</a>"
+        
+    await message.reply(msg, parse_mode=types.ParseMode.MARKDOWN)
 
 
 # report about spam or something else
@@ -191,31 +190,27 @@ async def get_admin_list(message: types.Message):
 async def report_by_user(message: types.Message):
     msg_id = message.reply_to_message.message_id
     user_id = message.from_user.id
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    for adm_id in admins_list:
+    admins_list = await message.chat.get_administrators()
+
+    for admin in admins_list:
         try:
             await bot.send_message(text=f"User: [{message.from_user.full_name}](tg://user?id={user_id})\n"
                                         f"Reported about next message:\n"
                                         f"[Возможное нарушение](t.me/{message.chat.username}/{msg_id})",
-                                   chat_id=adm_id, parse_mode=types.ParseMode.MARKDOWN,
+                                   chat_id=admin.user.id, parse_mode=types.ParseMode.MARKDOWN,
                                    disable_web_page_preview=True)
-        except:
-            pass
+        except Exception as e:
+            logging.debug(f"\nCan't send report message to {admin.user.id}\nError - {e}")
+
     await message.reply("I reported it to chat admins, thank you!")
 
 
 # # delete links and tags from users, allow for admins
-@dp.message_handler(content_types=['text'])
+@dp.message_handler(AdminFilter(is_chat_admin=False), content_types=['text'])
 async def delete_links(message: types.Message):
-    admins_list = [admin.user.id for admin in await bot.get_chat_administrators(chat_id=message.chat.id)]
-    if message.from_user.id not in admins_list:
-
-        if '@' in message.text:
+    for entity in message.entities:
+        if entity.type in ["url", "text_link", "mention"]:
             await bot.delete_message(message.chat.id, message.message_id)
-
-        for entity in message.entities:
-            if entity.type in ["url", "text_link"]:
-                await bot.delete_message(message.chat.id, message.message_id)
 
 
 # Polling
